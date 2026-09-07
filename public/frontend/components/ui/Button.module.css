@@ -1,0 +1,112 @@
+/* CryptoExam Core — Button Styles */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* ── Sizes ──
+   Every size keeps the canonical 12px radius: the brand's button is a
+   12px rounded rectangle, never a pill and never square. */
+.sm { padding: var(--space-sm) var(--space-lg); font-size: 14.4px; font-weight: 700; letter-spacing: 0.144px; }
+.md { padding: var(--space-md) var(--space-xl); font-size: 16px; font-weight: 600; }
+.lg { padding: 14px 28px; font-size: var(--fs-body-md); font-weight: 600; }
+
+/* ── Variants ──
+   primary = the orange conversion CTA · secondary = 1px ink outline
+   ghost = text-only · danger = semantic destructive */
+.primary {
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
+}
+.primary:hover:not(:disabled) {
+  background: #e64700;
+}
+.primary:active:not(:disabled) {
+  background: #cc3f00;
+}
+
+.secondary {
+  background: var(--brand-canvas);
+  color: var(--brand-ink);
+  border: 1px solid var(--brand-ink);
+}
+.secondary:hover:not(:disabled) {
+  background: var(--brand-canvas-soft);
+  border-color: var(--brand-ink);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--brand-ink);
+}
+.ghost:hover:not(:disabled) {
+  background: var(--brand-canvas-soft);
+  color: var(--brand-primary);
+}
+
+.danger {
+  background: var(--color-danger);
+  color: var(--brand-on-primary);
+}
+.danger:hover:not(:disabled) {
+  background: #7a1a1d;
+}
+
+/* The ink-dark CTA. Formerly a saffron gradient — the design language admits
+   no gradients and exactly one chromatic accent, so this becomes the solid
+   coffee-ink button that pairs with the orange primary. */
+.saffron {
+  background: var(--brand-ink);
+  color: var(--brand-on-primary);
+  font-weight: 600;
+}
+.saffron:hover:not(:disabled) {
+  background: var(--brand-ink-soft);
+}
+
+/* ── Full Width ── */
+.full { width: 100%; }
+
+/* ── Loading ── */
+.loading { color: transparent; }
+.spinner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,254,251,0.35);
+  border-top-color: var(--brand-on-primary);
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.1em;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

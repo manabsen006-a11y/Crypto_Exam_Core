@@ -1,0 +1,176 @@
+/* CryptoExam Core — Setter Layout
+   Premium minimalistic · light professional workbench */
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-page, #fffefb);
+  color: var(--text-body, #2f2a26);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 260px;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  background: #fffefb;
+  border-right: 1px solid var(--border-soft, #e8e2d8);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  overflow-y: auto;
+  z-index: 1100;
+}
+
+.sidebarHeader {
+  padding: 0 20px 18px;
+  border-bottom: 1px solid var(--border-soft, #e8e2d8);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: var(--color-navy-900, #1a1010);
+  margin-bottom: 10px;
+}
+
+.logoMark {
+  width: 30px; height: 30px;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--color-navy-900, #1a1010);
+  color: #fffefb;
+}
+
+.logoText {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.logoText b { font-weight: 700; }
+
+.roleBadge {
+  display: inline-block;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--color-saffron-100, #fff0e8);
+  color: var(--color-saffron-700, #7a2600);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── User Card ── */
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-soft, #e8e2d8);
+}
+
+.avatar {
+  width: 34px; height: 34px;
+  border-radius: 12px;
+  background: var(--color-navy-100, #ddd8cc);
+  color: var(--color-navy-700, #2b211c);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-navy-800, #201515);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userInst {
+  font-size: 11px;
+  color: var(--color-navy-400, #605d52);
+}
+
+/* ── Navigation ── */
+.nav {
+  flex: 1;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* App-shell nav row — the active state is marked by the brand primary. */
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  color: var(--brand-body);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: background-color 150ms ease, color 150ms ease;
+  border-left: 3px solid transparent;
+}
+.navItem svg { flex-shrink: 0; color: var(--brand-body-mid); }
+
+.navItem:hover {
+  background: var(--brand-canvas-soft);
+  color: var(--brand-ink);
+}
+.navItem:hover svg { color: var(--brand-ink); }
+
+.active {
+  background: var(--brand-canvas-soft);
+  color: var(--brand-ink);
+  font-weight: 600;
+  border-left-color: var(--brand-primary);
+}
+.active svg { color: var(--brand-primary); }
+
+/* ── Sidebar Footer ── */
+.sidebarFooter {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-soft, #e8e2d8);
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-navy-400, #605d52);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.backLink svg { transform: rotate(180deg); }
+.backLink:hover { color: var(--color-navy-700, #2b211c); }
+
+/* ── Main Content ── */
+.main {
+  flex: 1;
+  margin-left: 260px;
+  padding: 32px 40px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 16px; }
+}

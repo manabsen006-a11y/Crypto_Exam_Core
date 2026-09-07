@@ -1,0 +1,84 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Build outputs
+public/frontend/.next/
+public/frontend/out/
+public/backend/*.egg-info/
+dist/
+build/
+
+# Docker
+postgres_data/
+ipfs_data/
+redis_data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local databases (backend auto-seeds in DEBUG)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# TypeScript incremental cache
+*.tsbuildinfo
+
+# Internal planning doc (kept local, never tracked)
+zuup_os_implementation_plan.md
+
+# Crypto artifacts (sensitive)
+*.pem
+*.key
+!*.key.example
+
+# Circuit build artifacts (large, reproducible)
+public/circuits/build/*.wtns
+public/circuits/build/pot*.ptau
+
+# Python
+*.egg
+*.egg-info/
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Hardhat
+public/contracts/artifacts/
+public/contracts/cache/
+public/contracts/typechain-types/
+
+# Engine corpus (large, downloaded separately)
+public/backend/engine/corpus/*.parquet
+
+# Logs
+*.log
+logs/
+
+# IPFS
+ipfs_data/
+scripts/out/
+
+# ZUUP-OS image pipeline artifacts (multi-GB: disk image, kernel tree, UKI)
+private/zuup-os/image-build/out/
+
+# ZUUP-OS terminal walkthrough zip (local demo only, never tracked)
+zuup-os-terminal.zip

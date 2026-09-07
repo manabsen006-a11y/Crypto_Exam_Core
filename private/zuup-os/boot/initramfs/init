@@ -1,0 +1,153 @@
+#!/bin/sh
+# ZUUP-OS initramfs /init (spec §7.3) — the first userspace instruction.
+#
+# Runs from the signed UKI (so this script's bytes are themselves under the
+# Secure Boot signature). Its ONLY job is to close the trust chain:
+#
+#   UEFI ─verified─▶ UKI ─carries─▶ zuup.roothash ─verifies─▶ SquashFS root
+#
+# and to make every writable path RAM-only before handing off to systemd.
+# FAIL-CLOSED: any error path ends in poweroff -f. There is no rescue shell,
+# no prompt, no fallback root — a terminal that cannot prove its rootfs
+# integrity must not reach the Login Gate (INV-10).
+
+# Build note (mkinitramfs.sh): /bin/sh here is busybox; veritysetup is the
+# only external binary shipped. No mdev/udev — the devices used are static.
+
+fail() {
+  # Make the reason observable before halting: print to the console (not just
+  # kmsg) and hold for 30s so it can be read/photographed on real hardware.
+  # Still fail-closed — it powers off, it just doesn't vanish instantly.
+  echo "ZUUP-OS BOOT HALT: $1" > /dev/kmsg 2>/dev/null
+  echo "" > /dev/console 2>/dev/null
+  echo "ZUUP-OS BOOT HALT: $1" > /dev/console 2>/dev/null
+  echo "(halting in 30s)" > /dev/console 2>/dev/null
+  sync
+  /bin/busybox sleep 30 2>/dev/null
+  poweroff -f
+  exit 1 # unreachable
+}
+
+/bin/busybox mount -t proc     -o nosuid,nodev,noexec proc     /proc || fail "proc"
+/bin/busybox mount -t sysfs    -o nosuid,nodev,noexec sysfs    /sys  || fail "sysfs"
+/bin/busybox mount -t devtmpfs -o nosuid,noexec       devtmpfs /dev  || fail "devtmpfs"
+
+# ── 1. the verity root hash travels INSIDE the signed UKI cmdline ──────────
+ROOTHASH=""
+for arg in $(cat /proc/cmdline); do
+  case "$arg" in zuup.roothash=*) ROOTHASH="${arg#zuup.roothash=}" ;; esac
+done
+case "$ROOTHASH" in
+  [0-9a-f][0-9a-f][0-9a-f][0-9a-f]*) [ ${#ROOTHASH} -eq 64 ] || fail "malformed roothash" ;;
+  *) fail "no zuup.roothash on the signed cmdline" ;;
+esac
+
+# ── 2. the SquashFS + its verity tree arrive from PXE into RAM (/dev/ram0
+#       is populated by the UKI's PXE loader stage; on disk-provisioned
+#       terminals they are GPT partitions 2 and 3 of the image laid out by
+#       image-build/30-make-image.sh). There is no udev here, so partitions
+#       are resolved from sysfs by their fixed GPT index — misidentification
+#       is harmless because a wrong device cannot match the signed root hash
+#       and the boot HALTs at verity open. ──────────────────────────────────
+find_part() { # $1 = GPT partition number → echoes candidate /dev nodes,
+              # REMOVABLE parent (the USB) first, then others (QEMU/virtio).
+  _rem=""; _any=""
+  for b in /sys/class/block/*; do
+    [ -r "$b/partition" ] || continue
+    [ "$(cat "$b/partition")" = "$1" ] || continue
+    _dev="/dev/$(basename "$b")"
+    if [ "$(cat "$b/../removable" 2>/dev/null)" = "1" ]; then
+      _rem="$_rem $_dev"
+    else
+      _any="$_any $_dev"
+    fi
+  done
+  for d in $_rem $_any; do echo "$d"; done
+}
+
+# Real USB needs a few seconds to enumerate after the kernel brings up the
+# controller (QEMU is instant). Wait/retry up to ~30s for BOTH the root and
+# its verity tree to appear; removable (USB) candidates are preferred so we
+# never grab the internal disk's like-numbered partition.
+ROOTDEV=""; HASHDEV=""; _i=0
+while [ "$_i" -lt 10 ]; do            # ~5s: enough where the kernel DOES scan
+  ROOTDEV="$(find_part 2 | head -n1)"
+  HASHDEV="$(find_part 3 | head -n1)"
+  [ -n "$ROOTDEV" ] && [ -b "$ROOTDEV" ] && [ -n "$HASHDEV" ] && [ -b "$HASHDEV" ] && break
+  /bin/busybox sleep 0.5
+  _i=$((_i + 1))
+done
+
+# Diagnostics to the dev console: the kernel's authoritative block/partition
+# list + what we resolved, so any remaining failure is precise, not guessed.
+{
+  echo "=== ZUUP-OS DIAG: /proc/partitions ==="
+  cat /proc/partitions
+  echo "=== resolved ROOTDEV=$ROOTDEV  HASHDEV=$HASHDEV ==="
+} > /dev/console 2>/dev/null
+
+# ── 3. open the verity mapping. Two methods, tried in order; verity itself
+#       proves we opened the RIGHT bytes, so wrong guesses fail safely:
+#   (1) kernel-enumerated partitions — works where the firmware scanned the GPT;
+#   (2) GPT byte-offset mapping off the whole disk via loop devices — for
+#       firmware that attaches the USB but never scans its GPT (this hardware).
+
+le64() { # $1 dev, $2 byte-offset → little-endian u64 as decimal
+  _b=$(dd if="$1" bs=1 skip="$2" count=8 2>/dev/null | od -An -tu1)
+  set -- $_b
+  echo $(( ${1:-0} + ${2:-0}*256 + ${3:-0}*65536 + ${4:-0}*16777216 \
+         + ${5:-0}*4294967296 + ${6:-0}*1099511627776 \
+         + ${7:-0}*281474976710656 + ${8:-0}*72057594037927936 ))
+}
+
+opened=0
+# Method 1 — kernel-scanned partitions.
+if [ -n "$ROOTDEV" ] && [ -b "$ROOTDEV" ] && [ -n "$HASHDEV" ] && [ -b "$HASHDEV" ]; then
+  /sbin/veritysetup open "$ROOTDEV" zuup-root "$HASHDEV" "$ROOTHASH" --panic-on-corruption 2>/dev/null \
+    && opened=1
+fi
+
+# Method 2 — standard GPT (128-byte entries at LBA2): partition 2's FirstLBA is
+# at byte 1184, partition 3's at byte 1312. Map both off the whole disk by
+# offset and let verity confirm the right disk.
+if [ "$opened" = 0 ]; then
+  echo "ZUUP-OS: root partition not exposed by kernel — trying GPT-offset map…" > /dev/console 2>/dev/null
+  for b in /sys/class/block/*; do
+    name="$(basename "$b")"
+    [ -e "$b/partition" ] && continue              # whole disks only
+    case "$name" in ram*|loop*|zram*|dm-*|md*) continue ;; esac
+    dev="/dev/$name"; [ -b "$dev" ] || continue
+    p2=$(le64 "$dev" 1184); p3=$(le64 "$dev" 1312)
+    [ "${p2:-0}" -gt 0 ] 2>/dev/null || continue
+    [ "${p3:-0}" -gt 0 ] 2>/dev/null || continue
+    /bin/busybox losetup -o $(( p2 * 512 )) /dev/loop2 "$dev" 2>/dev/null || continue
+    /bin/busybox losetup -o $(( p3 * 512 )) /dev/loop3 "$dev" 2>/dev/null \
+      || { /bin/busybox losetup -d /dev/loop2 2>/dev/null; continue; }
+    if /sbin/veritysetup open /dev/loop2 zuup-root /dev/loop3 "$ROOTHASH" --panic-on-corruption 2>/dev/null; then
+      echo "ZUUP-OS: root mapped from $dev by GPT offset (p2 LBA $p2, p3 LBA $p3)" > /dev/console 2>/dev/null
+      opened=1; break
+    fi
+    /bin/busybox losetup -d /dev/loop2 2>/dev/null
+    /bin/busybox losetup -d /dev/loop3 2>/dev/null
+  done
+fi
+
+[ "$opened" = 1 ] || fail "verity open (no matching root found on any disk)"
+
+/bin/busybox mount -t squashfs -o ro,nosuid,nodev /dev/mapper/zuup-root /newroot \
+  || fail "squashfs mount"
+
+# ── 4. RAM-only writable surfaces (INV-2). The real fstab (rootfs/overlay.
+#       fstab) re-asserts these; mounting them here means even early systemd
+#       cannot touch a persistent medium. ───────────────────────────────────
+for d in tmp run var/log; do
+  /bin/busybox mount -t tmpfs -o rw,nosuid,nodev,noexec,mode=0755 tmpfs "/newroot/$d" \
+    || fail "tmpfs $d"
+done
+
+# ── 5. hand off. PID 1 becomes the signed image's systemd. ──────────────────
+/bin/busybox mount --move /proc /newroot/proc 2>/dev/null
+/bin/busybox mount --move /sys  /newroot/sys  2>/dev/null
+/bin/busybox mount --move /dev  /newroot/dev  2>/dev/null
+exec /bin/busybox switch_root /newroot /usr/lib/systemd/systemd
+fail "switch_root returned"

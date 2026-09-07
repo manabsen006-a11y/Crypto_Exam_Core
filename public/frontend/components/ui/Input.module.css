@@ -1,0 +1,74 @@
+/* CryptoExam Core — Input Styles */
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.light .label { color: var(--brand-ink); }
+.dark .label { color: var(--brand-mute); }
+
+/* text-input: 1px ink border, 6px radius — the one place the system steps
+   down from the 12px card radius. */
+.input {
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  border-radius: var(--radius-sm);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  outline: none;
+}
+
+.light .input {
+  background: var(--brand-canvas);
+  border: 1px solid var(--brand-ink);
+  color: var(--brand-ink);
+}
+
+.light .input:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(255, 79, 0, 0.16);
+}
+
+.dark .input {
+  background: var(--brand-ink-soft);
+  border: 1px solid var(--brand-body);
+  color: var(--brand-canvas);
+}
+
+.dark .input:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(255, 79, 0, 0.22);
+}
+
+.light .input::placeholder { color: var(--brand-body-mid); }
+.dark .input::placeholder { color: var(--brand-body-mid); }
+
+.inputError {
+  border-color: var(--color-danger) !important;
+}
+
+.inputError:focus {
+  box-shadow: 0 0 0 3px rgba(155, 34, 38, 0.16) !important;
+}
+
+.error {
+  font-size: 12px;
+  color: var(--color-danger);
+  margin: 0;
+}
+
+.hint {
+  font-size: 12px;
+  color: #939084;
+  margin: 0;
+}

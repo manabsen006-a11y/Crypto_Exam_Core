@@ -1,0 +1,149 @@
+/* Candidate Exam Portal — Premium Minimalistic */
+
+.container {
+  min-height: 100%;
+}
+
+/* ── Main ── */
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 0 48px;
+  width: 100%;
+}
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.heroIcon {
+  width: 72px; height: 72px;
+  border-radius: 12px;
+  background: var(--color-navy-50, #f8f4f0);
+  border: 1px solid var(--border-soft, #e8e2d8);
+  display: grid; place-items: center;
+  margin: 0 auto 20px;
+  color: var(--color-navy-700, #2b211c);
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-navy-900, #1a1010);
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--color-navy-500, #605d52);
+  line-height: 1.7;
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* ── Steps ── */
+.steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
+}
+
+.step {
+  text-align: center;
+  max-width: 220px;
+  padding: 24px 20px;
+  background: #fffefb;
+  border: 1px solid var(--border-soft, #e8e2d8);
+  border-radius: 12px;
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+.step:hover {
+  box-shadow: 0 2px 12px rgba(32, 21, 21,0.04);
+  border-color: var(--color-navy-200, #c5c0b1);
+}
+
+.stepNum {
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  background: var(--color-navy-800, #201515);
+  color: #fffefb;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.stepArrow {
+  color: var(--color-navy-300, #939084);
+  margin-top: 36px;
+}
+
+.stepTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-navy-800, #201515);
+  margin-bottom: 6px;
+}
+
+.stepDesc {
+  font-size: 13px;
+  color: var(--color-navy-500, #605d52);
+  line-height: 1.5;
+}
+
+/* ── Features ── */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.featureCard {
+  padding: 24px 20px;
+  background: #fffefb;
+  border: 1px solid var(--border-soft, #e8e2d8);
+  border-radius: 12px;
+  transition: all 200ms ease;
+  color: inherit;
+}
+
+.featureCard:hover {
+  border-color: var(--color-navy-200, #c5c0b1);
+  box-shadow: 0 2px 12px rgba(32, 21, 21,0.04);
+  transform: translateY(-1px);
+}
+
+.featureIcon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--color-navy-50, #f8f4f0);
+  border: 1px solid var(--border-soft, #e8e2d8);
+  color: var(--color-navy-600, #3d332c);
+  margin-bottom: 14px;
+}
+
+.featureCard h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-navy-800, #201515);
+  margin-bottom: 6px;
+}
+
+.featureCard p {
+  font-size: 13px;
+  color: var(--color-navy-500, #605d52);
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .steps { flex-direction: column; align-items: center; }
+  .stepArrow { transform: rotate(90deg); margin: 0; }
+  .features { grid-template-columns: 1fr; }
+}

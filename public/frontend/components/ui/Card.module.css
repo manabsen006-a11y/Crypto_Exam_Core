@@ -1,0 +1,51 @@
+/* CryptoExam Core — Card Styles */
+
+.card {
+  border-radius: var(--radius-md);   /* 12px — canonical card radius */
+  transition: all 200ms ease;
+}
+
+.pad-sm { padding: var(--space-lg); }
+.pad-md { padding: var(--space-xl); }
+.pad-lg { padding: var(--space-xl); }   /* 24px — the design's card interior */
+
+/* Level 2 elevation: a cream canvas-soft fill against the cream page. The
+   surface contrast IS the elevation, so there is no shadow at rest. */
+.default {
+  background: var(--brand-canvas-soft);
+  border: 1px solid transparent;
+}
+
+/* The polarity-flipped dark coffee card. */
+.dark {
+  background: var(--brand-ink);
+  border: 1px solid var(--brand-ink);
+  color: var(--brand-canvas-soft);
+}
+
+/* Formerly a navy gradient — the design language admits no gradients, so this
+   is solid ink lifted by the one accent as a warm glow. */
+.crypto {
+  background: var(--brand-ink);
+  border: 1px solid var(--color-saffron-700);
+  color: var(--brand-on-primary);
+  box-shadow: var(--shadow-crypto);
+}
+
+.glass {
+  background: rgba(255, 254, 251, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 254, 251, 0.10);
+  color: var(--brand-canvas-soft);
+}
+
+.hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+}
+
+.hover:active {
+  transform: translateY(0);
+}

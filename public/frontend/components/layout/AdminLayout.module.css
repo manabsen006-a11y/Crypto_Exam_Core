@@ -1,0 +1,242 @@
+/* CryptoExam Core — Admin Layout
+   Premium minimalistic · light professional dashboard */
+
+.container {
+  min-height: 100vh;
+  background: var(--bg-page, #fffefb);
+  color: var(--text-body, #2f2a26);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top Bar ── */
+.topBar {
+  height: 56px;
+  background: #fffefb;
+  border-bottom: 1px solid var(--border-soft, #e8e2d8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
+
+.topLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: var(--color-navy-900, #1a1010);
+}
+
+.logoMark {
+  width: 30px; height: 30px;
+  border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--color-navy-900, #1a1010);
+  color: #fffefb;
+}
+
+.logoText {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.logoText b { font-weight: 700; }
+
+.roleBadge {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #fbeeea;
+  color: #8f2418;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.topCenter {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-success, #3f6f4a);
+}
+
+.liveDot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--color-success, #3f6f4a);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.healthBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-navy-500, #605d52);
+}
+.healthBadge svg { color: var(--color-success, #3f6f4a); }
+
+.topRight {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.clock {
+  text-align: right;
+}
+
+.clockTime {
+  font-family: var(--font-mono, monospace);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-navy-800, #201515);
+  display: block;
+  line-height: 1;
+}
+
+.clockDate {
+  font-size: 10px;
+  color: var(--color-navy-400, #605d52);
+}
+
+.alertBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: #f7e3dd;
+  color: #8f2418;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.adminUser {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminAvatar {
+  width: 30px; height: 30px;
+  border-radius: 12px;
+  background: var(--color-navy-100, #ddd8cc);
+  color: var(--color-navy-700, #2b211c);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.adminName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-navy-700, #2b211c);
+}
+
+/* ── Body ── */
+.body {
+  display: flex;
+  flex: 1;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px;
+  background: #fffefb;
+  border-right: 1px solid var(--border-soft, #e8e2d8);
+  padding: 8px 10px;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* App-shell nav row — the active state is marked by the brand primary. */
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  color: var(--brand-body);
+  text-decoration: none;
+  transition: background-color 150ms ease, color 150ms ease;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+}
+.navItem svg { flex-shrink: 0; color: var(--brand-body-mid); }
+
+.navItem:hover {
+  background: var(--brand-canvas-soft);
+  color: var(--brand-ink);
+}
+.navItem:hover svg { color: var(--brand-ink); }
+
+.active {
+  background: var(--brand-canvas-soft);
+  color: var(--brand-ink);
+  font-weight: 600;
+  border-left-color: var(--brand-primary);
+}
+.active svg { color: var(--brand-primary); }
+
+.emergency {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft, #e8e2d8);
+  color: #8f2418;
+}
+.emergency svg { color: #9b2226; }
+.emergency:hover {
+  background: #fbeeea;
+  color: #7a1a1d;
+}
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  padding: 28px 32px;
+  overflow-x: hidden;
+  min-height: calc(100vh - 56px);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { padding: 16px; }
+  .topCenter { display: none; }
+}

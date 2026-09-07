@@ -1,0 +1,77 @@
+# ZUUP-OS kiosk unit (spec §7.4, §7.5) — systemd → Cage → Firefox, no escape.
+#
+# Cage is a single-surface Wayland compositor: it refuses every additional
+# wl_surface, so no second window, overlay, or screenshot-of-another-window can
+# exist. Firefox launches --kiosk at the Edge. The hardening directives below
+# are the systemd half of the §7.5 runtime enforcement (the AppArmor + seccomp
+# halves live alongside this file). Restart=always: there is no way to "exit".
+
+[Unit]
+Description=ZUUP-OS locked examination surface
+# The Gate renders only after the boot is attested (§7.1) and the biometric
+# daemon is serving — and never without the tunnel (INV-3, INV-10).
+# Cage needs a seat manager (seatd) to take the DRM display + input — logind is
+# masked on this image, so seatd is the one that hands cage the seat.
+After=zuup-network.target zuup-attest.service zuup-biometric.service seatd.service
+Requires=zuup-network.target zuup-attest.service seatd.service
+
+[Service]
+Type=simple
+# Cage owns the only display surface; Firefox is its only child. The launcher
+# picks the URL from this terminal's Edge-reported capability (§7.6) so the
+# ADMIN_STATION opens the Centre Admin portal, an INVIGILATOR_STATION/
+# CANDIDATE_SEAT opens the exam-terminal Gate, and anything else fails closed.
+# Cage needs an XDG_RUNTIME_DIR seat and Firefox a writable HOME — both RAM-only
+# (INV-2): /run/firefox via RuntimeDirectory, the profile under PrivateTmp's /tmp.
+Environment=XDG_RUNTIME_DIR=/run/firefox
+Environment=HOME=/tmp/firefox
+# The kernel ships WITHOUT user namespaces (a deliberate hardening — unprivileged
+# userns is an escalation vector). Firefox's content/GPU sandboxes rely on userns,
+# so disable them: the kiosk only ever loads the single trusted Edge origin on an
+# air-gapped LAN, so there is no untrusted web content to isolate from anyway.
+Environment=MOZ_DISABLE_CONTENT_SANDBOX=1
+Environment=MOZ_DISABLE_GMP_SANDBOX=1
+ExecStartPre=/bin/mkdir -p /tmp/firefox
+ExecStart=/usr/lib/zuup/zuup-kiosk-launch.sh
+Restart=always
+RestartSec=1
+
+# ── §7.5 runtime hardening ───────────────────────────────────────────────────
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+# AF_NETLINK is required by wlroots/libudev to enumerate + monitor the DRM and
+# input devices (cage fails "session udev monitor: Address family not supported"
+# without it). It is local kernel<->user comms, not a network egress path, so the
+# air-gap is unaffected.
+RestrictAddressFamilies=AF_UNIX AF_INET AF_NETLINK
+LockPersonality=yes
+# W^X (MemoryDenyWriteExecute) is intentionally NOT set: a browser engine needs
+# writable-then-executable mappings (graphics/regex/interp trampolines) even with
+# the JS JIT off, and Firefox crashes under strict W^X. The remaining hardening —
+# read-only verity root, no shell, seccomp, AppArmor, lockdown LSM, air-gap —
+# still stands; this only lifts W^X for the browser surface.
+SystemCallFilter=@system-service
+SystemCallArchitectures=native
+SystemCallErrorNumber=EPERM
+# seccomp allow-list (the explicit kill-list complement, §7.5)
+SystemCallFilter=~@debug @mount @reboot @swap @obsolete
+# Writable surfaces are tmpfs only (RAM; INV-2). RuntimeDirectory creates
+# /run/firefox at start (0700, auto-removed on stop); PrivateTmp gives a fresh
+# private /tmp tmpfs for the Firefox profile. These EXIST before the sandbox is
+# wired, unlike a ReadWritePaths bind of a not-yet-created /tmp/firefox — which
+# is what made systemd fail at 226/NAMESPACE and crash-loop the kiosk.
+RuntimeDirectory=firefox
+RuntimeDirectoryMode=0700
+PrivateTmp=yes
+# VT switching is disabled at logind; Cage takes the only seat.
+TTYVTDisallocate=yes
+
+[Install]
+WantedBy=zuup-session.target
